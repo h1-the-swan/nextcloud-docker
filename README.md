@@ -4,9 +4,9 @@
 
 `docker-compose up`
 
-Nextcloud will be running at <http://localhost:8080>
+Nextcloud will be running at <http://localhost:48916>
 
-Access on local network from <http://192.168.1.227:8080>
+Go to this address in a web browser and set up an admin account, e.g., username "admin", password "password"
 
 ## Notes
 
