@@ -9,7 +9,6 @@ services:
     env_file:
       - db.env
 
-
   redis:
     image: redis:alpine
     restart: always
@@ -17,39 +16,110 @@ services:
   app:
     image: nextcloud:apache
     restart: always
-    ports:
-      # - 127.0.0.1:8080:80
-      # - 127.0.0.1:48916:80
-      - 48916:80
     volumes:
       - nextcloud:/var/www/html
-      # - ./config.php:/var/www/html/config/config.php
+      - ./data:/var/www/html/data:z
     environment:
+      - VIRTUAL_HOST=
+      - LETSENCRYPT_HOST=
+      - LETSENCRYPT_EMAIL=
       - POSTGRES_HOST=db
       - REDIS_HOST=redis
-      # - NEXTCLOUD_TRUSTED_DOMAINS="localhost 192.168.1.112 192.168.1.111 192.168.1.227"
     env_file:
       - db.env
     depends_on:
       - db
       - redis
+    # ports:
+    #   - 48916:80
+    networks:
+      - proxy-tier
+      - default
 
   cron:
     image: nextcloud:apache
     restart: always
     volumes:
       - nextcloud:/var/www/html
+      - ./data:/var/www/html/data:z
     entrypoint: /cron.sh
     depends_on:
       - db
+      - redis
 
-  # localtunnel:
-  #   image: efrecon/localtunnel
-  #   links:
-  #     - app
-  #   command:
-  #     --local-host app --port 80
+  cloudflared:
+    image: cloudflare/cloudflared:2022.5.1
+    # volumes: 
+    #   - ./cloudflared:/etc/cloudflared
+    # env_file:
+    #   - ./cloudflared/cloudflared.env
+    # command: 'tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN} --hello-world'
+    # command: 'tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN} --url http://localhost:48916'
+    command: 'tunnel --no-autoupdate --loglevel debug run --token ${CLOUDFLARED_TOKEN} --url http://app:80'
+    # ports:
+    #   - 8080:8080
+    restart: 'on-failure'
+    networks:
+      - proxy-tier
+    depends_on:
+      - app
 
 volumes:
   db:
   nextcloud:
+  certs:
+  acme:
+  vhost.d:
+  html:
+
+networks:
+  proxy-tier:
+  
+
+
+
+
+  # proxy:
+  #   build: ./proxy
+  #   restart: always
+  #   ports:
+  #     - 80:80
+  #     - 443:443
+  #   labels:
+  #     com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+  #   volumes:
+  #     - certs:/etc/nginx/certs:ro
+  #     - vhost.d:/etc/nginx/vhost.d
+  #     - html:/usr/share/nginx/html
+  #     - /var/run/docker.sock:/tmp/docker.sock:ro
+  #   networks:
+  #     - proxy-tier
+
+  # letsencrypt-companion:
+  #   image: nginxproxy/acme-companion
+  #   restart: always
+  #   volumes:
+  #     - certs:/etc/nginx/certs
+  #     - acme:/etc/acme.sh
+  #     - vhost.d:/etc/nginx/vhost.d
+  #     - html:/usr/share/nginx/html
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   networks:
+  #     - proxy-tier
+  #   depends_on:
+  #     - proxy
+
+# self signed
+#  omgwtfssl:
+#    image: paulczar/omgwtfssl
+#    restart: "no"
+#    volumes:
+#      - certs:/certs
+#    environment:
+#      - SSL_SUBJECT=servhostname.local
+#      - CA_SUBJECT=my@example.com
+#      - SSL_KEY=/certs/servhostname.local.key
+#      - SSL_CSR=/certs/servhostname.local.csr
+#      - SSL_CERT=/certs/servhostname.local.crt
+#    networks:
+#      - proxy-tier
