@@ -2,8 +2,8 @@ version: '3'
 
 services:
   db:
-    image: postgres:alpine
-    restart: always
+    image: postgres:15-alpine
+    # restart: always
     volumes:
       - db:/var/lib/postgresql/data
     env_file:
@@ -14,7 +14,7 @@ services:
     restart: always
 
   app:
-    image: nextcloud:apache
+    image: nextcloud:26-apache
     restart: always
     volumes:
       - nextcloud:/var/www/html
@@ -37,7 +37,7 @@ services:
       - default
 
   cron:
-    image: nextcloud:apache
+    image: nextcloud:24.0.5-apache
     restart: always
     volumes:
       - nextcloud:/var/www/html
@@ -48,7 +48,7 @@ services:
       - redis
 
   cloudflared:
-    image: cloudflare/cloudflared:2022.5.1
+    image: cloudflare/cloudflared:2022.7.1
     # volumes: 
     #   - ./cloudflared:/etc/cloudflared
     # env_file:
