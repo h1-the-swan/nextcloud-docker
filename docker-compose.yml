@@ -14,7 +14,7 @@ services:
     restart: always
 
   app:
-    image: nextcloud:26-apache
+    image: nextcloud:26.0-apache
     restart: always
     volumes:
       - nextcloud:/var/www/html
@@ -37,7 +37,7 @@ services:
       - default
 
   cron:
-    image: nextcloud:24.0.5-apache
+    image: nextcloud:26.0-apache
     restart: always
     volumes:
       - nextcloud:/var/www/html
@@ -48,7 +48,7 @@ services:
       - redis
 
   cloudflared:
-    image: cloudflare/cloudflared:2022.7.1
+    image: cloudflare/cloudflared:2023.4.1
     # volumes: 
     #   - ./cloudflared:/etc/cloudflared
     # env_file:
