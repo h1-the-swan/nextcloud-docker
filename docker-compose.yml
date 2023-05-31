@@ -3,7 +3,7 @@ version: '3'
 services:
   db:
     image: postgres:15-alpine
-    # restart: always
+    restart: always
     volumes:
       - db:/var/lib/postgresql/data
     env_file:
@@ -30,8 +30,8 @@ services:
     depends_on:
       - db
       - redis
-    # ports:
-    #   - 48916:80
+    ports:
+      - 48916:80
     networks:
       - proxy-tier
       - default
@@ -48,7 +48,7 @@ services:
       - redis
 
   cloudflared:
-    image: cloudflare/cloudflared:2023.4.1
+    image: cloudflare/cloudflared:2023.4.2
     # volumes: 
     #   - ./cloudflared:/etc/cloudflared
     # env_file:
