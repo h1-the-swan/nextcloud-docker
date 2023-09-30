@@ -48,17 +48,18 @@ services:
       - redis
 
   cloudflared:
-    image: cloudflare/cloudflared:2023.4.2
+    image: cloudflare/cloudflared:2023.7.0
     # volumes: 
     #   - ./cloudflared:/etc/cloudflared
     # env_file:
     #   - ./cloudflared/cloudflared.env
     # command: 'tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN} --hello-world'
     # command: 'tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN} --url http://localhost:48916'
-    command: 'tunnel --no-autoupdate --loglevel debug run --token ${CLOUDFLARED_TOKEN} --url http://app:80'
+    # command: 'tunnel --no-autoupdate --loglevel debug run --token ${CLOUDFLARED_TOKEN} --url https://app:80'
+    command: 'tunnel --no-autoupdate --loglevel debug run --token ${CLOUDFLARED_TOKEN}'
     # ports:
     #   - 8080:8080
-    restart: 'on-failure'
+    restart: 'always'
     networks:
       - proxy-tier
     depends_on:
